@@ -1,3 +1,7 @@
 node_modules
 .env
 .next/
+.claude/
+.agents/
+.windsurf/
+skills-lock.json
