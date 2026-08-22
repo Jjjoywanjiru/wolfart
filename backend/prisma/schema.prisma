@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum ArtworkStatus {
+  AVAILABLE
+  BOOKED
+  SOLD
+}
+
+enum CommissionStatus {
+  REQUESTED
+  QUOTED
+  DEPOSIT_PENDING
+  IN_PROGRESS
+  READY
+  DELIVERED
+  DECLINED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+
+  artworks           Artwork[]
+  commissionRequests CommissionRequest[]
+  orders             Order[]
+}
+
+model Artwork {
+  id          String        @id @default(uuid())
+  artistId    String
+  artist      User          @relation(fields: [artistId], references: [id])
+  title       String
+  category    String
+  medium      String
+  dimensions  String
+  materials   String
+  description String
+  price       Decimal       @db.Decimal(10, 2)
+  status      ArtworkStatus @default(AVAILABLE)
+  createdAt   DateTime      @default(now())
+
+  orders Order[]
+}
+
+model CommissionRequest {
+  id              String           @id @default(uuid())
+  customerId      String
+  customer        User             @relation(fields: [customerId], references: [id])
+  description     String
+  preferredMedium String
+  budgetMin       Decimal          @db.Decimal(10, 2)
+  budgetMax       Decimal          @db.Decimal(10, 2)
+  desiredDate     DateTime?
+  status          CommissionStatus @default(REQUESTED)
+  quotedPrice     Decimal?         @db.Decimal(10, 2)
+  createdAt       DateTime         @default(now())
+
+  order Order?
+}
+
+model Order {
+  id            String             @id @default(uuid())
+  customerId    String
+  customer      User               @relation(fields: [customerId], references: [id])
+  artworkId     String?
+  artwork       Artwork?           @relation(fields: [artworkId], references: [id])
+  commissionId  String?            @unique
+  commission    CommissionRequest? @relation(fields: [commissionId], references: [id])
+  amount        Decimal            @db.Decimal(10, 2)
+  depositAmount Decimal?           @db.Decimal(10, 2)
+  createdAt     DateTime           @default(now())
+}
