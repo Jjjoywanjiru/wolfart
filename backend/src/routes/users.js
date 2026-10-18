@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../db.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -30,6 +31,11 @@ router.post("/login", async (req, res) => {
 
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+});
+
+router.get("/me", requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
 });
 
 export default router;
