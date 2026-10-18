@@ -2,12 +2,15 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import artworkRoutes from "./routes/artworks.js";
+import userRoutes from "./routes/users.js";
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use("/api/artworks", artworkRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/health", (req, res) => {
    res.json({ status: "ok" });
