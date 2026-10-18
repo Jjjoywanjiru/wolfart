@@ -59,6 +59,8 @@ model Artwork {
   price       Decimal       @db.Decimal(10, 2)
   status      ArtworkStatus @default(AVAILABLE)
   createdAt   DateTime      @default(now())
+  tools       String   @default("")
+  images      String[]
 
   orders Order[]
 }
@@ -91,3 +93,4 @@ model Order {
   depositAmount Decimal?           @db.Decimal(10, 2)
   createdAt     DateTime           @default(now())
 }
+
