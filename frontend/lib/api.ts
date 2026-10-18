@@ -8,6 +8,8 @@ export type Artwork = {
    description: string;
    price: string;
    status: "AVAILABLE" | "BOOKED" | "SOLD";
+   tools: string;
+   images: string[];
 };
 
 
