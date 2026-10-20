@@ -62,3 +62,31 @@ export async function registerRequest(
   const body = await res.json().catch(() => null);
   return { ok: false, error: body?.error ?? "Could not create the account" };
 }
+
+export type Commission = {
+  id: string;
+  description: string;
+  preferredMedium: string;
+  budgetMin: string;
+  budgetMax: string;
+  desiredDate: string | null;
+  status:
+    | "REQUESTED"
+    | "QUOTED"
+    | "DEPOSIT_PENDING"
+    | "IN_PROGRESS"
+    | "READY"
+    | "DELIVERED"
+    | "DECLINED";
+  quotedPrice: string | null;
+  createdAt: string;
+};
+
+export async function getMyCommissions(token: string): Promise<Commission[]> {
+  const res = await fetch(`${API_URL}/api/commissions/mine`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to load your requests");
+  return res.json();
+}

@@ -17,6 +17,7 @@ export default async function Header() {
           <Link href="/commission">Commission</Link>
           {session ? (
             <>
+            <Link href="/commission/mine">My requests</Link>
               {session.role === "ADMIN" && <Link href="/admin">Dashboard</Link>}
               <form action={logout}>
                 <button type="submit">Log out</button>
