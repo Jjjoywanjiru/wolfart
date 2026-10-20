@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getArtworks } from "@/lib/api";
-import { logout } from "./actions";
+import { logout, updateArtworkStatus, deleteArtwork } from "./actions";
+import DeleteButton from "./DeleteButton";
 
 export default async function AdminPage() {
   const session = await getSession();
@@ -38,6 +39,7 @@ export default async function AdminPage() {
             <th>Category</th>
             <th>Price</th>
             <th>Status</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +48,37 @@ export default async function AdminPage() {
               <td className="py-2">{art.title}</td>
               <td>{art.category}</td>
               <td>${Number(art.price).toLocaleString()}</td>
-              <td>{art.status}</td>
+              <td>
+                <form action={updateArtworkStatus} className="flex gap-2">
+                  <input type="hidden" name="id" value={art.id} />
+                  <select
+                    name="status"
+                    defaultValue={art.status}
+                    className="border border-line rounded px-2 py-1"
+                  >
+                    <option value="AVAILABLE">Available</option>
+                    <option value="BOOKED">Booked</option>
+                    <option value="SOLD">Sold</option>
+                  </select>
+                  <button type="submit" className="border border-line rounded px-2 py-1">
+                    Save
+                  </button>
+                </form>
+              </td>
+              <td>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/${art.id}/edit`}
+                    className="text-sm border border-line rounded px-2 py-1"
+                  >
+                    Edit
+                  </Link>
+                  <form action={deleteArtwork}>
+                    <input type="hidden" name="id" value={art.id} />
+                    <DeleteButton />
+                  </form>
+                </div>
+              </td> 
             </tr>
           ))}
         </tbody>

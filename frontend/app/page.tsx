@@ -43,7 +43,7 @@ export default async function CatalogPage({
         <p className="text-muted">Nothing here yet.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-          {artworks.map((art) => (
+          {artworks.map((art, i) => (
             <Link key={art.id} href={`/artwork/${art.id}`}>
               <div className="border border-line rounded-lg overflow-hidden">
                 <div className="relative h-32 bg-surface flex items-center justify-center text-muted text-sm">
@@ -54,6 +54,7 @@ export default async function CatalogPage({
                       fill
                       sizes="(min-width: 768px) 25vw, 50vw"
                       className="object-cover"
+                      loading={i < 4 ? "eager" : "lazy"}
                     />
                   ) : (
                     "No image"
