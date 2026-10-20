@@ -1,6 +1,7 @@
 import { getArtworks, type Artwork } from "@/lib/api";
 import Link from "next/link";
 import Image from "next/image";
+import { categories } from "@/lib/site";
 
 const statusStyles: Record<Artwork["status"], string> = {
   AVAILABLE: "bg-green-100 text-green-800",
@@ -8,7 +9,7 @@ const statusStyles: Record<Artwork["status"], string> = {
   SOLD: "bg-red-100 text-red-800",
 };
 
-const categories = ["Woodwork", "Painting", "Acrylic", "Watercolor", "Clay"];
+
 
 export default async function CatalogPage({
   searchParams,

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getArtworks } from "@/lib/api";
@@ -24,7 +25,12 @@ export default async function AdminPage() {
         </form>
       </div>
 
-      <h2 className="font-medium mb-3">Artworks ({artworks.length})</h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-medium">Artworks ({artworks.length})</h2>
+        <Link href="/admin/new" className="text-sm border border-line rounded px-3 py-1">
+          Add artwork
+        </Link>
+      </div>
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-muted border-b border-line">
