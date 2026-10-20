@@ -31,3 +31,19 @@ export async function getArtwork(id: string): Promise<Artwork | null> {
   return res.json();
 }
 
+export type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "CUSTOMER";
+};
+
+export async function loginRequest(email: string, password: string) {
+  const res = await fetch(`${API_URL}/api/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) return null;
+  return (await res.json()) as { token: string; user: SessionUser };
+}
