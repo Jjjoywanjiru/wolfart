@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { API_URL } from "@/lib/api";
 import { getToken } from "@/lib/session";
+import { uploadImage } from "@/lib/cloudinary";
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 export async function logout() {
   const cookieStore = await cookies();
@@ -25,6 +27,26 @@ export async function createArtwork(
     return { error: "Enter a valid price" };
   }
 
+  const files = formData
+    .getAll("images")
+    .filter((f): f is File => f instanceof File && f.size > 0);
+
+  for (const file of files) {
+    if (!file.type.startsWith("image/")) {
+      return { error: `${file.name} is not an image` };
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return { error: `${file.name} is larger than 8 MB` };
+    }
+  }
+
+  let images: string[] = [];
+  try {
+    images = await Promise.all(files.map(uploadImage));
+  } catch {
+    return { error: "Photo upload failed. Check the Cloudinary settings and try again." };
+  }
+
   const res = await fetch(`${API_URL}/api/artworks`, {
     method: "POST",
     headers: {
@@ -40,6 +62,7 @@ export async function createArtwork(
       tools: formData.get("tools"),
       description: formData.get("description"),
       price,
+      images,
     }),
   });
 

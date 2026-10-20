@@ -44,6 +44,10 @@ export default function NewArtworkForm() {
         <textarea name="description" rows={4} required className={inputClass} />
       </label>
       <label className="flex flex-col gap-1">
+        Photos (the first one is the cover)
+        <input name="images" type="file" accept="image/*" multiple className={inputClass} />
+      </label>
+      <label className="flex flex-col gap-1">
         Price
         <input name="price" type="number" min="0" step="0.01" required className={inputClass} />
       </label>
