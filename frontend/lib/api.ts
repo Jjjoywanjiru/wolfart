@@ -47,3 +47,18 @@ export async function loginRequest(email: string, password: string) {
   if (!res.ok) return null;
   return (await res.json()) as { token: string; user: SessionUser };
 }
+
+export async function registerRequest(
+  name: string,
+  email: string,
+  password: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await fetch(`${API_URL}/api/users/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+  if (res.ok) return { ok: true };
+  const body = await res.json().catch(() => null);
+  return { ok: false, error: body?.error ?? "Could not create the account" };
+}

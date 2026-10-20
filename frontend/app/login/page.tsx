@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { login } from "./actions";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, undefined);
@@ -36,6 +37,12 @@ export default function LoginPage() {
         >
           {pending ? "Logging in…" : "Log in"}
         </button>
+        <p className="text-sm text-muted mt-4">
+          New here?{" "}
+          <Link href="/register" className="underline">
+           Create an account
+          </Link>
+      </p>
       </form>
     </main>
   );

@@ -46,14 +46,14 @@ export default async function CatalogPage({
           {artworks.map((art, i) => (
             <Link key={art.id} href={`/artwork/${art.id}`}>
               <div className="border border-line rounded-lg overflow-hidden">
-                <div className="relative h-32 bg-surface flex items-center justify-center text-muted text-sm">
+                <div className="relative h-48 bg-surface flex items-center justify-center text-muted text-sm">
                   {art.images[0] ? (
                     <Image
                       src={art.images[0]}
                       alt={art.title}
                       fill
                       sizes="(min-width: 768px) 25vw, 50vw"
-                      className="object-cover"
+                      className="object-contain"
                       loading={i < 4 ? "eager" : "lazy"}
                     />
                   ) : (

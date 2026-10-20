@@ -21,7 +21,7 @@ export default async function ArtworkPage({
               alt={art.title}
               fill
               sizes="(min-width: 768px) 50vw, 100vw"
-              className="object-cover"
+              className="object-contain"
             />
           ) : (
             "No image"
@@ -36,7 +36,7 @@ export default async function ArtworkPage({
                   alt={`${art.title}, photo ${i + 2}`}
                   fill
                   sizes="15vw"
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             ))}

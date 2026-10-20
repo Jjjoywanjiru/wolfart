@@ -17,3 +17,14 @@ export async function getSession(): Promise<SessionUser | null> {
   if (!res.ok) return null;
   return res.json();
 }
+
+export async function setSessionCookie(token: string) {
+  const cookieStore = await cookies();
+  cookieStore.set("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+}
