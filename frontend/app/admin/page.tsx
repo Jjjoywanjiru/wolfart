@@ -24,6 +24,9 @@ export default async function AdminPage() {
             Log out
           </button>
         </form>
+        <Link href="/admin/commissions" className="text-sm border border-line rounded px-3 py-1">
+          Commission requests
+        </Link>
       </div>
 
       <div className="flex items-center justify-between mb-3">

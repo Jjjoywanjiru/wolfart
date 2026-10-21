@@ -90,3 +90,16 @@ export async function getMyCommissions(token: string): Promise<Commission[]> {
   if (!res.ok) throw new Error("Failed to load your requests");
   return res.json();
 }
+
+export type AdminCommission = Commission & {
+  customer: { id: string; name: string; email: string };
+};
+
+export async function getAllCommissions(token: string): Promise<AdminCommission[]> {
+  const res = await fetch(`${API_URL}/api/commissions`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to load commission requests");
+  return res.json();
+}
