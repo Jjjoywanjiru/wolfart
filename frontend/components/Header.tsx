@@ -2,9 +2,11 @@ import Link from "next/link";
 import { siteName } from "@/lib/site";
 import { getSession } from "@/lib/session";
 import { logout } from "@/app/admin/actions";
+import NavLink from "./NavLink";
 
 export default async function Header() {
   const session = await getSession();
+  const isAdmin = session?.role === "ADMIN";
 
   return (
     <header className="border-b border-line">
@@ -13,18 +15,28 @@ export default async function Header() {
           {siteName}
         </Link>
         <nav className="flex items-center gap-6 text-sm text-muted">
-          <Link href="/">Shop</Link>
-          <Link href="/commission">Commission</Link>
-          {session ? (
+          <NavLink href="/" match={["/", "/artwork"]}>
+            Shop
+          </NavLink>
+          {isAdmin ? (
             <>
-            <Link href="/commission/mine">My requests</Link>
-              {session.role === "ADMIN" && <Link href="/admin">Dashboard</Link>}
-              <form action={logout}>
-                <button type="submit">Log out</button>
-              </form>
+              <NavLink href="/admin" exclude={["/admin/commissions"]}>
+                Dashboard
+              </NavLink>
+              <NavLink href="/admin/commissions">Customer requests</NavLink>
             </>
           ) : (
-            <Link href="/login">Log in</Link>
+            <NavLink href="/commission" exclude={["/commission/mine"]}>
+              Commission
+            </NavLink>
+          )}
+          {session && !isAdmin && <NavLink href="/commission/mine">My requests</NavLink>}
+          {session ? (
+            <form action={logout}>
+              <button type="submit">Log out</button>
+            </form>
+          ) : (
+            <NavLink href="/login">Log in</NavLink>
           )}
         </nav>
       </div>
