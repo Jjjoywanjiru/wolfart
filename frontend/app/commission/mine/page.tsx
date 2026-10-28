@@ -2,6 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession, getToken } from "@/lib/session";
 import { getMyCommissions, type Commission } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
+import QuotedPrice from "@/components/QuotedPrice";
+import { acceptQuote } from "../actions";
 
 const statusLabels: Record<Commission["status"], string> = {
   REQUESTED: "Waiting for the artist",
@@ -17,6 +20,7 @@ export default async function MyCommissionsPage() {
   const session = await getSession();
   const token = await getToken();
   if (!session || !token) redirect("/login");
+  if (session.role === "ADMIN") redirect("/admin/commissions");
 
   const commissions = await getMyCommissions(token);
 
@@ -30,7 +34,7 @@ export default async function MyCommissionsPage() {
       </div>
 
       {commissions.length === 0 ? (
-        <p className="text-muted">You haven't sent any requests yet.</p>
+        <p className="text-muted">You haven&apos;t sent any requests yet.</p>
       ) : (
         <ul className="flex flex-col gap-4">
           {commissions.map((c) => (
@@ -43,13 +47,37 @@ export default async function MyCommissionsPage() {
               </div>
               <p className="text-sm mb-2">{c.description}</p>
               <p className="text-xs text-muted">
-                Budget ${Number(c.budgetMin).toLocaleString()} to $
-                {Number(c.budgetMax).toLocaleString()}
+                Budget {formatMoney(c.budgetMin)} to {formatMoney(c.budgetMax)}
                 {c.desiredDate &&
                   ` · Needed by ${new Date(c.desiredDate).toLocaleDateString("en-GB")}`}
-                {c.quotedPrice &&
-                  ` · Quoted $${Number(c.quotedPrice).toLocaleString()}`}
               </p>
+
+              {c.quotedPrice && (
+                <QuotedPrice
+                  amount={c.quotedPrice}
+                  deposit={c.order?.depositAmount}
+                />
+              )}
+
+              {c.status === "QUOTED" && c.quotedPrice && (
+                <form action={acceptQuote} className="mt-3 flex items-center gap-3 text-sm">
+                  <input type="hidden" name="id" value={c.id} />
+                  <button
+                    type="submit"
+                    className="bg-primary text-primary-foreground rounded px-3 py-1"
+                  >
+                    Accept quote
+                  </button>
+                  <span className="text-muted">
+                    You&apos;ll then pay a deposit before work starts.
+                  </span>
+                </form>
+              )}
+              {c.status === "DEPOSIT_PENDING" && (
+                <p className="mt-3 text-sm">
+                  Please pay the deposit above before work can start.
+                </p>
+              )}
             </li>
           ))}
         </ul>

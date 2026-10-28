@@ -44,3 +44,19 @@ export async function submitCommission(
   revalidatePath("/commission/mine");
   redirect("/commission/mine");
 }
+
+export async function acceptQuote(formData: FormData) {
+  const token = await getToken();
+  if (!token) redirect("/login");
+
+  const id = String(formData.get("id"));
+
+  const res = await fetch(`${API_URL}/api/commissions/${id}/accept`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Could not accept the quote");
+
+  revalidatePath("/commission/mine");
+  revalidatePath("/admin/commissions");
+}

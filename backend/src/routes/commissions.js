@@ -4,7 +4,12 @@ import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
+const DEPOSIT_RATE = 0.3; // placeholder: confirm the real percentage with Wahu
+
 router.post("/", requireAuth, async (req, res) => {
+  if (req.user.role === "ADMIN") {
+  return res.status(403).json({ error: "Admins can't send commission requests" });
+}
   const { description, preferredMedium, budgetMin, budgetMax, desiredDate } = req.body;
 
   const min = Number(budgetMin);
@@ -46,6 +51,7 @@ router.post("/", requireAuth, async (req, res) => {
 router.get("/mine", requireAuth, async (req, res) => {
   const requests = await prisma.commissionRequest.findMany({
     where: { customerId: req.user.id },
+    include: { order: { select: { amount: true, depositAmount: true } } },
     orderBy: { createdAt: "desc" },
   });
   res.json(requests);
@@ -53,7 +59,10 @@ router.get("/mine", requireAuth, async (req, res) => {
 
 router.get("/", requireAuth, requireAdmin, async (req, res) => {
   const requests = await prisma.commissionRequest.findMany({
-    include: { customer: { select: { id: true, name: true, email: true } } },
+    include: {
+      customer: { select: { id: true, name: true, email: true } },
+      order: { select: { amount: true, depositAmount: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
   res.json(requests);
@@ -92,6 +101,39 @@ router.post("/:id/respond", requireAuth, requireAdmin, async (req, res) => {
   }
 
   res.status(400).json({ error: "action must be quote or decline" });
+});
+
+router.post("/:id/accept", requireAuth, async (req, res) => {
+  const request = await prisma.commissionRequest.findUnique({
+    where: { id: req.params.id },
+  });
+
+  if (!request || request.customerId !== req.user.id) {
+    return res.status(404).json({ error: "Request not found" });
+  }
+  if (request.status !== "QUOTED" || request.quotedPrice == null) {
+    return res.status(409).json({ error: "There is no quote to accept" });
+  }
+
+  const amount = request.quotedPrice;
+  const deposit = amount.mul(DEPOSIT_RATE).toDecimalPlaces(2);
+
+  const [updated] = await prisma.$transaction([
+    prisma.commissionRequest.update({
+      where: { id: request.id },
+      data: { status: "DEPOSIT_PENDING" },
+    }),
+    prisma.order.create({
+      data: {
+        customerId: request.customerId,
+        commissionId: request.id,
+        amount,
+        depositAmount: deposit,
+      },
+    }),
+  ]);
+
+  res.json(updated);
 });
 
 export default router;
