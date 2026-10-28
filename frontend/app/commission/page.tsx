@@ -9,17 +9,29 @@ export default async function CommissionPage() {
     <main className="max-w-xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-bold mb-2">Request a commission</h1>
       <p className="text-muted mb-6">
-        Tell the artist what you have in mind. She'll review your request and reply
-        with a quote.
+        Tell the artist what you have in mind. She&apos;ll review your request and
+        reply with a quote.
       </p>
-      {session ? (
-        <CommissionForm />
-      ) : (
+      {!session ? (
         <p>
-          <Link href="/login" className="underline">Log in</Link> or{" "}
-          <Link href="/register" className="underline">create an account</Link> to
-          send a request, so you can follow its progress.
+          <Link href="/login" className="underline">
+            Log in
+          </Link>{" "}
+          or{" "}
+          <Link href="/register" className="underline">
+            create an account
+          </Link>{" "}
+          to send a request, so you can follow its progress.
         </p>
+      ) : session.role === "ADMIN" ? (
+        <p>
+          Commission requests are sent by customers.{" "}
+          <Link href="/admin/commissions" className="underline">
+            View customer requests
+          </Link>
+        </p>
+      ) : (
+        <CommissionForm />
       )}
     </main>
   );
