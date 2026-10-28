@@ -51,7 +51,9 @@ router.post("/", requireAuth, async (req, res) => {
 router.get("/mine", requireAuth, async (req, res) => {
   const requests = await prisma.commissionRequest.findMany({
     where: { customerId: req.user.id },
-    include: { order: { select: { amount: true, depositAmount: true } } },
+    include: {
+      order: { select: { amount: true, depositAmount: true, paymentStatus: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
   res.json(requests);
@@ -61,7 +63,7 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
   const requests = await prisma.commissionRequest.findMany({
     include: {
       customer: { select: { id: true, name: true, email: true } },
-      order: { select: { amount: true, depositAmount: true } },
+      order: { select: { amount: true, depositAmount: true, paymentStatus: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -131,6 +133,61 @@ router.post("/:id/accept", requireAuth, async (req, res) => {
         depositAmount: deposit,
       },
     }),
+  ]);
+
+  res.json(updated);
+});
+
+const STEPS = {
+  deposit_received: {
+    from: "DEPOSIT_PENDING",
+    to: "IN_PROGRESS",
+    order: () => ({ paymentStatus: "DEPOSIT_PAID", depositPaidAt: new Date() }),
+  },
+  ready: {
+    from: "IN_PROGRESS",
+    to: "READY",
+    order: () => ({}),
+  },
+  balance_received: {
+    from: "READY",
+    requires: "DEPOSIT_PAID",
+    order: () => ({ paymentStatus: "PAID", balancePaidAt: new Date() }),
+  },
+  delivered: {
+    from: "READY",
+    to: "DELIVERED",
+    requires: "PAID",
+    order: () => ({}),
+  },
+};
+
+router.post("/:id/advance", requireAuth, requireAdmin, async (req, res) => {
+  const key = req.body.step;
+  if (typeof key !== "string" || !Object.hasOwn(STEPS, key)) {
+    return res.status(400).json({ error: "Unknown step" });
+  }
+  const step = STEPS[key];
+
+  const request = await prisma.commissionRequest.findUnique({
+    where: { id: req.params.id },
+    include: { order: true },
+  });
+  if (!request?.order) return res.status(404).json({ error: "Request not found" });
+
+  if (request.status !== step.from) {
+    return res.status(409).json({ error: "That step doesn't apply at this stage" });
+  }
+  if (step.requires && request.order.paymentStatus !== step.requires) {
+    return res.status(409).json({ error: "Record the earlier payment first" });
+  }
+
+  const [updated] = await prisma.$transaction([
+    prisma.commissionRequest.update({
+      where: { id: request.id },
+      data: { status: step.to ?? request.status },
+    }),
+    prisma.order.update({ where: { id: request.order.id }, data: step.order() }),
   ]);
 
   res.json(updated);
