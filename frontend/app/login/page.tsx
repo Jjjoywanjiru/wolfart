@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
-import { login } from "./actions";
 import Link from "next/link";
+import { useActionState } from "react";
+import PasswordInput from "@/components/PasswordInput";
+import { login } from "./actions";
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, undefined);
@@ -10,26 +11,23 @@ export default function LoginPage() {
   return (
     <main className="max-w-sm mx-auto px-6 py-16">
       <h1 className="text-2xl font-bold mb-6">Log in</h1>
-      <form action={formAction} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          Email
+      <form action={formAction} className="flex flex-col gap-4 text-sm">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
             name="email"
             type="email"
             required
+            autoComplete="email"
             className="border border-line rounded px-3 py-2"
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Password
-          <input
-            name="password"
-            type="password"
-            required
-            className="border border-line rounded px-3 py-2"
-          />
-        </label>
-        {state?.error && <p className="text-sm text-red-700">{state.error}</p>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="password">Password</label>
+          <PasswordInput id="password" autoComplete="current-password" />
+        </div>
+        {state?.error && <p className="text-red-700">{state.error}</p>}
         <button
           type="submit"
           disabled={pending}
@@ -37,13 +35,13 @@ export default function LoginPage() {
         >
           {pending ? "Logging in…" : "Log in"}
         </button>
-        <p className="text-sm text-muted mt-4">
-          New here?{" "}
-          <Link href="/register" className="underline">
-           Create an account
-          </Link>
-      </p>
       </form>
+      <p className="text-sm text-muted mt-4">
+        New here?{" "}
+        <Link href="/register" className="underline">
+          Create an account
+        </Link>
+      </p>
     </main>
   );
 }

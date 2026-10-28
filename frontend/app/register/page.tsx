@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { register } from "./actions";
+import PasswordInput from "@/components/PasswordInput";
 
 const inputClass = "border border-line rounded px-3 py-2";
 
@@ -21,10 +22,10 @@ export default function RegisterPage() {
           Email
           <input name="email" type="email" required className={inputClass} />
         </label>
-        <label className="flex flex-col gap-1">
-          Password (8+ characters)
-          <input name="password" type="password" minLength={8} required className={inputClass} />
-        </label>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="password">Password (8+ characters)</label>
+          <PasswordInput id="password" minLength={8} autoComplete="new-password" />
+        </div>
         {state?.error && <p className="text-red-700">{state.error}</p>}
         <button
           type="submit"
