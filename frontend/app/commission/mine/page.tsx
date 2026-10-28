@@ -78,6 +78,21 @@ export default async function MyCommissionsPage() {
                   Please pay the deposit above before work can start.
                 </p>
               )}
+              {c.status === "IN_PROGRESS" && (
+                <p className="mt-3 text-sm">
+                  Your deposit has been received and the artist has started work.
+                </p>
+              )}
+              {c.status === "READY" && c.order && (
+                <p className="mt-3 text-sm">
+                  {c.order.paymentStatus === "PAID"
+                    ? "Paid in full. Your piece is ready for delivery."
+                    : `Your piece is ready. Balance due: ${formatMoney(
+                        Number(c.order.amount) - Number(c.order.depositAmount ?? 0)
+                      )}`}
+                </p>
+              )}
+              {c.status === "DELIVERED" && <p className="mt-3 text-sm">Delivered. Thank you!</p>}
             </li>
           ))}
         </ul>
