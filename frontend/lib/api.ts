@@ -79,7 +79,11 @@ export type Commission = {
     | "DELIVERED"
     | "DECLINED";
   quotedPrice: string | null;
-  order?: { amount: string; depositAmount: string | null } | null;
+  order?: {
+  amount: string;
+  depositAmount: string | null;
+  paymentStatus: "UNPAID" | "DEPOSIT_PAID" | "PAID";
+} | null;
   createdAt: string;
 };
 
