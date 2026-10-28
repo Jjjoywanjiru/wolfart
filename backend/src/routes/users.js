@@ -35,6 +35,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) return res.status(401).json({ error: "Account no longer exists" });
   res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
 });
 
