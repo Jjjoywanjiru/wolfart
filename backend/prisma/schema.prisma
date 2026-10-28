@@ -5,7 +5,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -31,6 +30,12 @@ enum CommissionStatus {
   READY
   DELIVERED
   DECLINED
+}
+
+enum PaymentStatus {
+  UNPAID
+  DEPOSIT_PAID
+  PAID
 }
 
 model User {
@@ -59,7 +64,7 @@ model Artwork {
   price       Decimal       @db.Decimal(10, 2)
   status      ArtworkStatus @default(AVAILABLE)
   createdAt   DateTime      @default(now())
-  tools       String   @default("")
+  tools       String        @default("")
   images      String[]
 
   orders Order[]
@@ -91,6 +96,8 @@ model Order {
   commission    CommissionRequest? @relation(fields: [commissionId], references: [id])
   amount        Decimal            @db.Decimal(10, 2)
   depositAmount Decimal?           @db.Decimal(10, 2)
+  paymentStatus PaymentStatus      @default(UNPAID)
+  depositPaidAt DateTime?
+  balancePaidAt DateTime?
   createdAt     DateTime           @default(now())
 }
-
