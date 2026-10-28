@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession, getToken } from "@/lib/session";
 import { getAllCommissions, type Commission } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
+import QuotedPrice from "@/components/QuotedPrice";
 import { respondToCommission } from "./actions";
 
 const statusLabels: Record<Commission["status"], string> = {
@@ -26,7 +28,7 @@ export default async function AdminCommissionsPage() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-10">
       <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold">Commission requests</h1>
+        <h1 className="text-2xl font-bold">Customer requests</h1>
         <Link href="/admin" className="text-sm border border-line rounded px-3 py-1">
           Back to dashboard
         </Link>
@@ -49,15 +51,25 @@ export default async function AdminCommissionsPage() {
                 </span>
               </div>
               <p className="text-xs text-muted mb-2">
-                {c.preferredMedium} · Budget ${Number(c.budgetMin).toLocaleString()} to $
-                {Number(c.budgetMax).toLocaleString()}
+                {c.preferredMedium} · Budget {formatMoney(c.budgetMin)} to{" "}
+                {formatMoney(c.budgetMax)}
                 {c.desiredDate &&
                   ` · Needed by ${new Date(c.desiredDate).toLocaleDateString("en-GB")}`}
               </p>
-              <p className="text-sm mb-3">{c.description}</p>
+              <p className="text-sm">{c.description}</p>
+
+              {c.quotedPrice && (
+                <QuotedPrice
+                  amount={c.quotedPrice}
+                  deposit={c.order?.depositAmount}
+                />
+              )}
 
               {(c.status === "REQUESTED" || c.status === "QUOTED") && (
-                <form action={respondToCommission} className="flex items-center gap-2 text-sm">
+                <form
+                  action={respondToCommission}
+                  className="mt-3 flex items-center gap-2 text-sm"
+                >
                   <input type="hidden" name="id" value={c.id} />
                   <span className="text-muted">$</span>
                   <input
@@ -87,11 +99,6 @@ export default async function AdminCommissionsPage() {
                     Decline
                   </button>
                 </form>
-              )}
-              {c.status !== "REQUESTED" && c.status !== "QUOTED" && c.quotedPrice && (
-                <p className="text-sm text-muted">
-                  Quoted ${Number(c.quotedPrice).toLocaleString()}
-                </p>
               )}
             </li>
           ))}
